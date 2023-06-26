@@ -3,9 +3,9 @@
 ### Data
 Long-read data, Oxford Nanopore
 
-    `1 376 601 reads`
+`1 376 601 reads`
 
-    `19 454 247 303 bp`
+`19 454 247 303 bp`
 
 ## Sub-sample of reads
 Using [Filt-long v0.2.1](https://github.com/rrwick/Filtlong)
