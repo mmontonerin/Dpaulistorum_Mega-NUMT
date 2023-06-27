@@ -21,7 +21,7 @@ done
 
 
 #Correct FASTA file
-for flyline in "MS" "O11" "A28" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
 do
         filter_vcf=$(find ./ -name "${flyline}_filtered*.vcf.gz" -type f)
         assembly="../${flyline}_nextdenovo.fasta"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Round 1 pilon
-for flyline in "A28" "MS" "O11" "D_equinoxialis" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
 do
         assembly="./${flyline}_pepper_cor.fasta"
         if ${flyline} =~ "D_paulistorum_L12"
@@ -35,7 +35,8 @@ do
 done
 
 #ln files
-for flyline in "A28" "MS" "O11" "D_equinoxialis" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
+
 do
         assembly_path="/space/no_backup/merce/polish/${flyline}_pilon1/pilon.fasta"
 
@@ -47,7 +48,7 @@ done
 rm ./*_pilon1/*.wig
 
 #Round 2 pilon
-for flyline in "A28" "MS" "O11" "D_equinoxialis" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
 do
         assembly="./${flyline}_pilon1.fasta"
         if ${flyline} =~ "D_paulistorum_L12"
@@ -81,7 +82,7 @@ do
 done
 
 #ln files
-for flyline in "A28" "MS" "O11" "D_equinoxialis" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
 do
         assembly_path="/space/no_backup/merce/polish/${flyline}_pilon2/pilon.fasta"
 
@@ -93,7 +94,7 @@ done
 rm ./*_pilon2/*.wig
 
 #Round 3 pilon
-for flyline in "A28" "MS" "O11" "D_equinoxialis" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
 do
         assembly="./${flyline}_pilon2.fasta"
         if ${flyline} =~ "D_paulistorum_L12"
@@ -127,7 +128,7 @@ do
 done
 
 #ln files
-for flyline in "A28" "MS" "O11" "D_equinoxialis" "D_insularis" "D_paulistorum_L06" "D_paulistorum_L12" "D_sp" "D_sucinea" "D_tropicalis" "D_willistoni_00" "D_willistoni_LG3"
+for flyline in "O11" "others"
 do
         assembly_path="/space/no_backup/merce/polish/${flyline}_pilon3/pilon.fasta"
 
