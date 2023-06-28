@@ -1,0 +1,12 @@
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7369940-7381809 -strand minus -out ../mito/O11_mito1.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7382576-7398528 -strand minus -out ../mito/O11_mito2.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7400555-7416322 -strand plus -out ../mito/O11_mito3.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7446684-7457789 -strand minus -out ../mito/O11_mito4.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7458556-7471795 -strand minus -out ../mito/O11_mito5.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7473773-7493140 -strand minus -out ../mito/O11_mito6.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7493143-7511762 -strand minus -out ../mito/O11_mito7.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7511758-7528663 -strand minus -out ../mito/O11_mito8.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7528667-7551753 -strand minus -out ../mito/O11_mito9.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7553000-7568966 -strand minus -out ../mito/O11_mito10.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7569495-7589061 -strand minus -out ../mito/O11_mito11.fasta
+blastdbcmd -db ../assemblies/O11.fasta -dbtype nucl -entry ctg000940 -range 7589058-7604093 -strand minus -out ../mito/O11_mito12.fasta
