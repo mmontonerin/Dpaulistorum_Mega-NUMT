@@ -1,0 +1,218 @@
+##########################################################################
+# This is the modification of the Snakefile workflow to annotate fungal  #
+# genomes using GeneMark-ES, but only maintaining the repeats part of it #
+# to be run in fly genomes of D. paulistorum                             #
+#                                                                        #
+#                                                                        #
+# 1) Repeat prediction and repeat masking                                #
+# 2) Protein alignment (not in this script)                              #
+# 3) GeneMark gene prediction (not in this script)                       #
+# 4) Functional annotation using InterProScan and BLAST (not in this script)#
+#                                                                        #
+#                                                                        #
+# Original pipeline created from WABI project: A_Rosling_1705            #
+#                                                                        #
+# 1.0: Written by Verena Kutschera, July 2018                            #
+#      (verena.kutschera@scilifelab.se)                                  #
+# 2.0: Update to include InterProScan, Sept. 2018                        #
+# 3.0: Update using only publicly available software, Apr. 2020          #
+# 4.0: Update to filter repeat libraries, May 2020                       #
+##########################################################################
+
+##########################################################################
+########################## SNAKEMAKE PARAMETERS ##########################
+##########################################################################
+
+configfile: "config.yaml"
+
+import os
+REF_PATH=config["REF_DIR"] + "/" + config["REF_NAME"] + "." + config["REF_EXT"]
+REP_REF_DIR=config["REP_DIR"] + "/" + config["REF_NAME"] + "/"
+OUT_DIR=config["ANN_DIR"] + "/" + config["REF_NAME"] + "/"
+PROT_DIR=os.path.dirname(config["PROT"]) + "/"
+PROT_FASTA=os.path.basename(config["PROT"])
+PROT_NAME, PROT_EXT=os.path.splitext(PROT_FASTA)
+
+##########################################################################
+############################ SNAKEMAKE RULES #############################
+##########################################################################
+
+rule all:
+    input:
+        OUT_DIR + config["REF_NAME"] + ".upper.masked.fasta",
+
+### 1) Repeat modeling and masking
+
+rule ref_upper:
+    """Reference assembly file preparation for RepeatModeler and RepeatMasker: change all lowercase bases to uppercase"""
+    input:
+        ref = REF_PATH
+    output:
+        ref_upper = REP_REF_DIR + config["REF_NAME"] + ".upper.fasta"
+    params:
+        dir = REP_REF_DIR
+    shell:
+        """
+        awk '{{ if ($0 !~ />/) {{print toupper($0)}} else {{print $0}} }}' {input.ref} > {output.ref_upper}
+        """
+
+rule repeatmodeler:
+    """RepeatModeler for de novo repeat prediction from a reference assembly."""
+    input:
+        ref_upper = rules.ref_upper.output
+    output:
+        repmo_raw = REP_REF_DIR + "repeatmodeler/" + config["REF_NAME"] + ".consensi.fa.classified"
+    params:
+        dir = REP_REF_DIR + "repeatmodeler/",
+        name = config["REF_NAME"]
+    log: REP_REF_DIR + "repeatmodeler/RM.log"
+    threads: 4
+    shell:
+        """
+        cd {params.dir}
+        module load bioinfo-tools RepeatModeler/1.0.8_RM4.0.7
+
+        # Build repeat database
+        BuildDatabase -engine ncbi -name {params.name} {input.ref_upper} &&
+
+        # Run RepeatModeler
+        RepeatModeler -engine ncbi -pa {threads} -database {params.name} >& {log} &&
+
+        # copy the output file to a new directory
+        cp RM_*.*/consensi.fa.classified {output.repmo_raw}
+        """
+
+rule split_uniprot:
+    """Split the UniProt/Swissprot protein database into chunks for transposonPSI"""
+    input: 
+        prot = config["PROT"] # curated proteins from swissprot/uniprot
+    output:
+        chunks = temp(expand(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa", nr=range(1, 101)))
+    params:
+        dir = PROT_DIR,
+        prot = PROT_FASTA
+    conda: "envs/gaas.yaml"
+    shell:
+        """
+        cd {params.dir}
+        gaas_fasta_splitter.pl -f {params.prot} --nb_chunks 100 -o tmp &&
+        mv tmp/*.fa split_result/ && rm -r tmp/
+        """
+
+rule transposonPSI:
+    """Identify transposons in the UniProt/Swissprot protein dataset"""
+    input:
+        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
+    output:
+        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
+        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
+    params:
+        dir = PROT_DIR + "split_result/"
+    conda: "envs/tePSI.yaml"
+    shell:
+        """
+        cd {params.dir}
+        transposonPSI.pl {input.chunk} prot
+        """
+
+rule list_tePSI_hits:
+    input:
+        topHits = expand(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits", nr=range(1, 101))
+    output:
+        allTopHits = config["PROT"] + ".TPSI.topHits",
+        prot_list = config["PROT"] + ".TPSI.topHits.accessions.txt"
+    shell:
+        """
+        cat {input.topHits} > {output.allTopHits} &&
+        awk '{{if($0 ~ /^[^\/\/.*]/) print $5}}' {output.allTopHits} | sort -u > {output.prot_list}
+        """
+
+rule filter_uniprot_fasta:
+    """Remove transposons from the UniProt/Swissprot protein dataset"""
+    input:
+        prot = config["PROT"],
+        prot_list = config["PROT"] + ".TPSI.topHits.accessions.txt"
+    output:
+        prot_filtered = PROT_DIR + PROT_NAME + ".noTEs.fa"
+    params:
+        dir = PROT_DIR
+    conda: "envs/gaas.yaml"
+    shell:
+        """
+        cd {params.dir}
+        gaas_fasta_removeSeqFromIDlist.pl -f {input.prot} -l {input.prot_list} -o {output.prot_filtered}
+        """
+
+rule filtered_blast_db:
+    """Generate BLAST database from filtered UniProt/Swissprot protein dataset"""
+    input: 
+        prot_filtered = PROT_DIR + PROT_NAME + ".noTEs.fa"
+    output:
+        phr = PROT_DIR + PROT_NAME + ".noTEs.fa.phr",
+        pin = PROT_DIR + PROT_NAME + ".noTEs.fa.pin",
+        psq = PROT_DIR + PROT_NAME + ".noTEs.fa.psq"
+    params:
+        dir = PROT_DIR
+    shell:
+        """
+        cd {params.dir}
+        module load bioinfo-tools blast/2.7.1+
+        makeblastdb -in {input.prot_filtered} -dbtype prot
+        """
+
+rule blast_repeat_library:
+    """Blastx repeat library to filtered Uniprot/Swissprot database"""
+    input:
+        repmo_raw = REP_REF_DIR + "repeatmodeler/" + config["REF_NAME"] + ".consensi.fa.classified",
+        blast_db_idx = rules.filtered_blast_db.output,
+        blast_db = PROT_DIR + PROT_NAME + ".noTEs.fa"
+    output:
+        blast = REP_REF_DIR + "repeatmodeler/"  + config["REF_NAME"] + ".consensi.fa.classified.blastx.out"
+    params:
+        dir = REP_REF_DIR + "repeatmodeler/"
+    threads: 8
+    shell:
+        """
+        cd {params.dir}
+        module load bioinfo-tools blast/2.7.1+
+        blastx -num_threads {threads} -db {input.blast_db} -query {input.repmo_raw} -out {output.blast}
+        """
+
+rule protexcluder:
+    """Remove blast hits from repeat library"""
+    input:
+        repmo_raw = REP_REF_DIR + "repeatmodeler/" + config["REF_NAME"] + ".consensi.fa.classified",
+        blast = REP_REF_DIR + "repeatmodeler/"  + config["REF_NAME"] + ".consensi.fa.classified.blastx.out"
+    output:
+        repmo_fil = REP_REF_DIR + "repeatmodeler/" + config["REF_NAME"] + ".consensi.fa.classifiednoProtFinal"
+    params:
+        dir = REP_REF_DIR
+    conda: "envs/protexcluder.yaml"
+    shell:
+        """
+        cd {params.dir}
+        ProtExcluder.pl {input.blast} {input.repmo_raw}
+        """
+
+rule repeatmasker:
+    """Repeat mask the full genome assembly using raw de novo predicted repeats."""
+    input:
+        ref_upper = rules.ref_upper.output,
+        repmo_fil = rules.protexcluder.output.repmo_fil
+    output:
+        ref_align = REP_REF_DIR + config["REF_NAME"] + ".upper.fasta.align",
+        ref_cat = REP_REF_DIR + config["REF_NAME"] + ".upper.fasta.cat.gz",
+        ref_masked = REP_REF_DIR + config["REF_NAME"] + ".upper.fasta.masked",
+        ref_out = REP_REF_DIR + config["REF_NAME"] + ".upper.fasta.out",
+        ref_tbl = REP_REF_DIR + config["REF_NAME"] + ".upper.fasta.tbl",
+        ref_soft = OUT_DIR + config["REF_NAME"] + ".upper.masked.fasta"
+    params:
+        dir = REP_REF_DIR
+    threads: 4
+    shell:
+        """
+        cd {params.dir}
+        module load bioinfo-tools RepeatMasker/4.0.7
+        RepeatMasker -pa {threads} -a -xsmall -gccalc -dir ./ -lib {input.repmo_fil} {input.ref_upper} --gff &&
+        cp {output.ref_masked} {output.ref_soft}
+        """
