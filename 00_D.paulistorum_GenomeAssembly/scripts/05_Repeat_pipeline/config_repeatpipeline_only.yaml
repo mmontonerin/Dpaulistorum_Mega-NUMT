@@ -1,0 +1,30 @@
+#################################################################
+#################################################################
+# Configuration settings for the workflow to annotate fungal    #
+# genomes using  GeneMark-ES                                    #
+#################################################################
+#################################################################
+
+################### GENOME ASSEMBLY VARIABLES ###################
+# For a given assembly version, edit the variables below
+
+### Make sure the fasta headers are properly formatted
+REF_DIR: "/path/to/directory/assemblies" # directory containing reference assembly, e.g. "/home/user/annotation_project/assemblies/assembly_v2.1_idrenamed_short"
+REF_NAME: "Assembly_polish_nextdenovo" # file name without file extension, e.g. "assembly_v2.1_idrenamed_short"
+REF_EXT: "fasta" # fasta file name extension, e.g. "fasta"
+
+# Note that fasta file headers (ids) need to be as short and concise
+# as possible to avoid problems with downstream programs.
+
+
+##################### PATHS TO OUTPUT DATA ######################
+### Output directory for repeat prediction and masking
+# Path for RepeatModeler and RepeatMasker analyses (full path).
+# Within that directory, a subdirectory will be created using the reference assembly name ("REF_NAME").
+REP_DIR: "/path/to/directory/assemblies/annotation/repeats" # e.g. "/home/user/annotation_project/repeats"
+
+### Protein alignment
+PROT: "/path/to/directory/assemblies/annotation/database/uniprot_sprot.fasta" # full path to fasta file containing reviewed proteins from Swiss-Prot/UniProt (download to cluster), e.g. "/home/user/annotation_project/evidence/uniprot_sprot.fasta"
+
+### Output directory for annotation
+ANN_DIR: "/path/to/directory/assemblies/annotation/gene_annotation" # full path, e.g. "/home/user/annotation_project/GeneMark"

@@ -1,0 +1,23 @@
+# cluster.yaml - cluster configuration file for annotation workflow
+__default__:
+  account: # enter your snic compute project account ID
+  time: 01:00:00
+  n: 1
+  partition: core
+repeatmodeler:
+  n: 4
+  time: 10-00:00:00
+transposonPSI:
+  time: 10-00:00:00
+filter_uniprot_fasta:
+  time: 1-00:00:00
+filtered_blast_db:
+  time: 08:00:00
+blast_repeat_library:
+  n: 8
+  time: 4-00:00:00
+protexcluder:
+  time: 1-00:00:00
+repeatmasker:
+  n: 4
+  time: 10-00:00:00
