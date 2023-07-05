@@ -12,8 +12,13 @@ grep -e "LTR/Gypsy" O11_940_all_rep.bed > O11_940_gypsy_rep.bed
 
 grep -e "DNA/hAT" O11_940_all_rep.bed > O11_940_hAT_rep.bed
 
+grep -e "DNA/TcMar" O11_940_all_rep.bed > O11_940_TcMar_rep.bed
+
+grep -e "LTR/Copia" O11_940_all_rep.bed > O11_940_Copia_rep.bed 
+
 grep -e "Simple_repeat" O11_940_all_rep.bed > O11_940_simple_rep.bed
 
-#To check what is left (repeats not relevant for the region in study (730kb-end))
-grep -v -E "RC/Helitron|Unknown|LTR/Gypsy|DNA/hAT|Simple_repeat" O11_940_all_rep.bed > O11_940_without_specials.bed
+grep -e "A-rich" O11_940_all_rep.bed > O11_940_Arich_rep.bed
 
+#To check what is left (repeats not relevant for the region in study (730kb-end))
+grep -v -E "RC/Helitron|Unknown|LTR/Gypsy|DNA/hAT|LTR/Copia|DNA/TcMar|Simple_repeat|A-rich" O11_940_all_rep.bed > O11_940_without_specials.bed
