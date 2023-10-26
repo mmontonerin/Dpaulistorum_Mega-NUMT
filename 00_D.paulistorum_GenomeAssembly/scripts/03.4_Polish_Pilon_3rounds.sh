@@ -4,14 +4,9 @@
 for flyline in "O11" "others"
 do
         assembly="./${flyline}_pepper_cor.fasta"
-        if ${flyline} =~ "D_paulistorum_L12"
-        then
-                illumina1="../paulistorum/MS_illumina_R1.fastq.gz"
-                illumina2="../paulistorum/MS_illumina_R2.fastq.gz"
-        else
+        
         illumina1="../paulistorum/${flyline}_illumina_R1.fastq.gz"
         illumina2="../paulistorum/${flyline}_illumina_R2.fastq.gz"
-        fi
 
         echo "Running:"
         echo "$assembly"
